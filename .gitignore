@@ -1,3 +1,11 @@
+# dbt + DuckDB (regenerated from src/data/raw/open_meteo/*.csv via create_db.py)
+*.duckdb
+*.duckdb.wal
+dbt_packages/
+logs/
+package-lock.yml
+.user.yml
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

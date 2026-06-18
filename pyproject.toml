@@ -1,0 +1,15 @@
+[project]
+name = "dbt-ie-group-project"
+version = "0.1.0"
+description = "Analytics Engineering group project — Open-Meteo weather data with dbt + DuckDB"
+readme = "README.md"
+requires-python = ">=3.10,<3.13"
+dependencies = [
+    "dbt-core==1.8.0",
+    "dbt-duckdb>=1.8.0",
+    "duckdb==0.10.2",
+    "certifi",
+]
+
+[tool.uv]
+package = false
