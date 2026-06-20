@@ -1,0 +1,49 @@
+version: 2
+
+models:
+  - name: stg_weather_daily
+    description: Recent daily weather per city from the Open-Meteo Forecast API (past_days). Grain - one row per city per day.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - city_name
+            - weather_date
+    columns:
+      - name: source_name
+        description: Label of the extraction source (constant 'recent_weather').
+      - name: extracted_at
+        description: Timestamp when the data was pulled from the API.
+      - name: location_id
+        description: Identifier of the city, foreign key to stg_locations.
+        tests:
+          - not_null
+      - name: city_name
+        description: Name of the city the measurement belongs to.
+        tests:
+          - not_null
+      - name: country_code
+        description: ISO country code of the city.
+      - name: weather_date
+        description: Calendar date of the daily measurement.
+        tests:
+          - not_null
+      - name: latitude
+        description: Latitude of the city.
+      - name: longitude
+        description: Longitude of the city.
+      - name: timezone
+        description: Timezone of the city.
+      - name: temp_max_celsius
+        description: Maximum temperature of the day, in degrees Celsius.
+      - name: temp_min_celsius
+        description: Minimum temperature of the day, in degrees Celsius.
+      - name: temp_mean_celsius
+        description: Mean temperature of the day, in degrees Celsius.
+      - name: precipitation_mm
+        description: Total precipitation for the day, in millimeters.
+      - name: rain_mm
+        description: Total rain for the day, in millimeters.
+      - name: snowfall_cm
+        description: Total snowfall for the day, in centimeters.
+      - name: wind_speed_max_kmh
+        description: Maximum wind speed at 10m during the day, in km/h.
