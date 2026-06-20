@@ -9,8 +9,8 @@ sources:
         description: "City metadata from the Geocoding API. Grain: one row per selected city."
       - name: weather_daily
         description: "Recent daily weather from the Forecast API (past_days). Grain: one row per city per day."
-      - name: forecast_daily
-        description: "Forecasted daily weather. Grain: one row per city per forecast date per extraction run."
+      - name: weather_forecast_7d
+        description: "7-day daily weather forecast from the Forecast API. Grain: one row per city per forecast date per extraction run."
       - name: air_quality_hourly
         description: "Air quality forecast observations. Grain: one row per city per hour."
       - name: historical_weather_daily
