@@ -1,0 +1,31 @@
+version: 2
+
+models:
+  - name: int_air_quality_weekday_weekend
+    description: Compares average air quality between weekdays and weekends per city, to surface human-activity-driven pollution patterns (e.g. traffic). Grain - one row per city per day_type.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - city_name
+            - day_type
+    columns:
+      - name: city_name
+        description: Name of the city.
+        tests:
+          - not_null
+      - name: day_type
+        description: Either 'weekday' or 'weekend'.
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['weekday', 'weekend']
+      - name: avg_pm10_ug_m3
+        description: Average of the daily mean PM10 concentration, in micrograms per cubic meter.
+      - name: avg_pm2_5_ug_m3
+        description: Average of the daily mean PM2.5 concentration, in micrograms per cubic meter.
+      - name: avg_nitrogen_dioxide_ug_m3
+        description: Average of the daily mean nitrogen dioxide concentration, in micrograms per cubic meter.
+      - name: avg_european_aqi
+        description: Average of the daily mean European Air Quality Index.
+      - name: days_observed
+        description: Number of days aggregated into this row.

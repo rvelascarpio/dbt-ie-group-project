@@ -1,0 +1,29 @@
+version: 2
+
+models:
+  - name: int_heatwave_events
+    description: Detects runs of consecutive days per city with temp_max_celsius above 35C, grouping them into discrete heatwave episodes (gaps-and-islands pattern) instead of flagging isolated hot days. Grain - one row per heatwave episode per city. Downstream marts can filter duration_days to apply a stricter heatwave definition (e.g. 3+ consecutive days).
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - city_name
+            - start_date
+    columns:
+      - name: city_name
+        description: Name of the city.
+        tests:
+          - not_null
+      - name: start_date
+        description: First day of the heatwave episode.
+        tests:
+          - not_null
+      - name: end_date
+        description: Last day of the heatwave episode.
+        tests:
+          - not_null
+      - name: duration_days
+        description: Number of consecutive days in the episode.
+      - name: peak_temp_max_celsius
+        description: Highest daily maximum temperature reached during the episode, in degrees Celsius.
+      - name: avg_temp_max_celsius
+        description: Average daily maximum temperature during the episode, in degrees Celsius.
