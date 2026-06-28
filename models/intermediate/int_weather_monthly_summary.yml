@@ -1,0 +1,33 @@
+version: 2
+
+models:
+  - name: int_weather_monthly_summary
+    description: Aggregates the unioned daily weather timeline (recent + historical) to monthly grain per city, to support month-over-month and year-over-year climate comparisons. Grain - one row per city per calendar month.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - city_name
+            - month_start
+    columns:
+      - name: city_name
+        description: Name of the city.
+        tests:
+          - not_null
+      - name: month_start
+        description: First day of the calendar month being summarized.
+        tests:
+          - not_null
+      - name: year
+        description: Calendar year of the month.
+      - name: month
+        description: Calendar month number (1-12).
+      - name: avg_temp_max_celsius
+        description: Average of the daily maximum temperature over the month, in degrees Celsius.
+      - name: avg_temp_min_celsius
+        description: Average of the daily minimum temperature over the month, in degrees Celsius.
+      - name: total_precipitation_mm
+        description: Total precipitation over the month, in millimeters.
+      - name: days_observed
+        description: Number of days with data aggregated into this row.
+      - name: data_source
+        description: Which underlying staging model the days came from, either 'recent_weather' or 'historical_weather'.

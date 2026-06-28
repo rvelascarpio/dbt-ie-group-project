@@ -1,0 +1,35 @@
+version: 2
+
+models:
+  - name: int_air_quality_alerts
+    description: Flags city-days where air quality exceeds recognized health thresholds. Grain - one row per city per day.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - city_name
+            - quality_date
+    columns:
+      - name: location_id
+        description: Identifier of the city, foreign key to stg_locations.
+        tests:
+          - not_null
+      - name: city_name
+        description: Name of the city.
+        tests:
+          - not_null
+      - name: country_code
+        description: ISO country code of the city.
+      - name: quality_date
+        description: Calendar date of the aggregated measurements.
+        tests:
+          - not_null
+      - name: avg_pm2_5_ug_m3
+        description: Average PM2.5 concentration for the day, in micrograms per cubic meter.
+      - name: avg_european_aqi
+        description: Average European Air Quality Index for the day.
+      - name: max_european_aqi
+        description: Maximum European Air Quality Index for the day.
+      - name: exceeds_who_pm2_5_guideline
+        description: True if the daily mean PM2.5 exceeds the WHO (2021) 24h guideline of 15 ug/m3.
+      - name: exceeds_eu_aqi_poor_threshold
+        description: True if the average European AQI is 60 or above (the "Poor" band on the EEA 0-100+ scale).

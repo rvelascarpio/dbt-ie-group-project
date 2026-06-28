@@ -1,0 +1,31 @@
+version: 2
+
+models:
+  - name: int_air_quality_population_exposure
+    description: Combines daily air quality with city population to approximate population exposure to PM2.5 pollution. Grain - one row per city per day.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - city_name
+            - quality_date
+    columns:
+      - name: city_name
+        description: Name of the city.
+        tests:
+          - not_null
+      - name: quality_date
+        description: Calendar date of the aggregated measurements.
+        tests:
+          - not_null
+      - name: population
+        description: Population of the city.
+        tests:
+          - not_null
+      - name: elevation_meters
+        description: Elevation of the city above sea level, in meters.
+      - name: avg_pm2_5_ug_m3
+        description: Average PM2.5 concentration for the day, in micrograms per cubic meter.
+      - name: avg_european_aqi
+        description: Average European Air Quality Index for the day.
+      - name: pm2_5_population_exposure_index
+        description: Proxy for population-weighted pollution exposure (avg PM2.5 multiplied by city population). Higher values indicate more people exposed to higher pollution.

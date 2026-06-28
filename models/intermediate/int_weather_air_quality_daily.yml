@@ -1,0 +1,51 @@
+version: 2
+
+models:
+  - name: int_weather_air_quality_daily
+    description: Combines recent daily weather with daily-aggregated air quality for the same city and date, to support analysis of weather/pollution correlation. Grain - one row per city per date with both weather and air quality data.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - city_name
+            - weather_date
+    columns:
+      - name: city_name
+        description: Name of the city.
+        tests:
+          - not_null
+      - name: weather_date
+        description: Calendar date of the observation.
+        tests:
+          - not_null
+      - name: temp_max_celsius
+        description: Maximum temperature of the day, in degrees Celsius.
+      - name: temp_min_celsius
+        description: Minimum temperature of the day, in degrees Celsius.
+      - name: temp_mean_celsius
+        description: Mean temperature of the day, in degrees Celsius.
+      - name: precipitation_mm
+        description: Total precipitation for the day, in millimeters.
+      - name: rain_mm
+        description: Total rain for the day, in millimeters.
+      - name: snowfall_cm
+        description: Total snowfall for the day, in centimeters.
+      - name: wind_speed_max_kmh
+        description: Maximum wind speed at 10m during the day, in km/h.
+      - name: avg_pm10_ug_m3
+        description: Average PM10 concentration for the day, in micrograms per cubic meter.
+      - name: max_pm10_ug_m3
+        description: Maximum PM10 concentration for the day, in micrograms per cubic meter.
+      - name: avg_pm2_5_ug_m3
+        description: Average PM2.5 concentration for the day, in micrograms per cubic meter.
+      - name: max_pm2_5_ug_m3
+        description: Maximum PM2.5 concentration for the day, in micrograms per cubic meter.
+      - name: avg_carbon_monoxide_ug_m3
+        description: Average carbon monoxide concentration for the day, in micrograms per cubic meter.
+      - name: avg_nitrogen_dioxide_ug_m3
+        description: Average nitrogen dioxide concentration for the day, in micrograms per cubic meter.
+      - name: avg_ozone_ug_m3
+        description: Average ozone concentration for the day, in micrograms per cubic meter.
+      - name: avg_european_aqi
+        description: Average European Air Quality Index for the day.
+      - name: max_european_aqi
+        description: Maximum European Air Quality Index for the day.
