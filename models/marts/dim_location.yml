@@ -1,0 +1,32 @@
+version: 2
+
+models:
+  - name: dim_location
+    description: City dimension. Grain - one row per city. Joined to by all fact tables on city_name, since recent, historical, and forecast weather sources only carry city_name (not location_id) for matching.
+    columns:
+      - name: location_id
+        description: Open-Meteo geocoding id for the city.
+        tests:
+          - unique
+          - not_null
+      - name: city_name
+        description: Name of the city. The business key used to join this dimension to every fact/mart table.
+        tests:
+          - unique
+          - not_null
+      - name: country
+        description: Country name.
+      - name: country_code
+        description: ISO country code.
+      - name: region
+        description: First-level administrative region (state/province).
+      - name: latitude
+        description: Latitude of the city.
+      - name: longitude
+        description: Longitude of the city.
+      - name: timezone
+        description: Timezone of the city.
+      - name: elevation_meters
+        description: Elevation above sea level, in meters.
+      - name: population
+        description: Population of the city.

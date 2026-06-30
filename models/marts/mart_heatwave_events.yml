@@ -1,0 +1,44 @@
+version: 2
+
+models:
+  - name: mart_heatwave_events
+    description: Heatwave episodes per city, enriched with city attributes. A heatwave is defined as a consecutive run of days with temp_max above 35C (gaps-and-islands detection in int_heatwave_events). Apply a duration_days filter (e.g. >= 3) in the dashboard for a stricter definition. Grain - one row per heatwave episode per city.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - city_name
+            - start_date
+    columns:
+      - name: city_name
+        description: Name of the city.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_location')
+              field: city_name
+      - name: start_date
+        description: First day of the heatwave episode.
+        tests:
+          - not_null
+      - name: end_date
+        description: Last day of the heatwave episode.
+        tests:
+          - not_null
+      - name: duration_days
+        description: Number of consecutive days in the episode.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 1
+              max_value: 365
+      - name: peak_temp_max_celsius
+        description: Highest daily maximum temperature reached during the episode, in degrees Celsius.
+      - name: avg_temp_max_celsius
+        description: Average daily maximum temperature during the episode, in degrees Celsius.
+      - name: country
+        description: Country name, from dim_location.
+      - name: country_code
+        description: ISO country code, from dim_location.
+      - name: region
+        description: First-level administrative region, from dim_location.
+      - name: population
+        description: Population of the city, from dim_location.

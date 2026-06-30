@@ -1,0 +1,46 @@
+version: 2
+
+models:
+  - name: fct_forecast_city_day
+    description: Forecast accuracy fact, comparing 7-day forecasted daily weather against the actual observed weather for the same city and date. Grain - one row per city per forecast date with both a forecast and an actual observation.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - city_name
+            - forecast_date
+    columns:
+      - name: city_name
+        description: Name of the city.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_location')
+              field: city_name
+      - name: forecast_date
+        description: Calendar date the forecast and actual weather are compared for.
+        tests:
+          - not_null
+      - name: forecast_temp_max_celsius
+        description: Forecasted daily maximum temperature, in degrees Celsius.
+      - name: actual_temp_max_celsius
+        description: Observed daily maximum temperature, in degrees Celsius.
+      - name: temp_max_error_celsius
+        description: Forecast minus actual maximum temperature, in degrees Celsius.
+      - name: forecast_temp_min_celsius
+        description: Forecasted daily minimum temperature, in degrees Celsius.
+      - name: actual_temp_min_celsius
+        description: Observed daily minimum temperature, in degrees Celsius.
+      - name: temp_min_error_celsius
+        description: Forecast minus actual minimum temperature, in degrees Celsius.
+      - name: forecast_precipitation_mm
+        description: Forecasted total daily precipitation, in millimeters.
+      - name: actual_precipitation_mm
+        description: Observed total daily precipitation, in millimeters.
+      - name: precipitation_error_mm
+        description: Forecast minus actual precipitation, in millimeters.
+      - name: forecast_wind_speed_max_kmh
+        description: Forecasted maximum wind speed, in km/h.
+      - name: actual_wind_speed_max_kmh
+        description: Observed maximum wind speed, in km/h.
+      - name: wind_speed_max_error_kmh
+        description: Forecast minus actual maximum wind speed, in km/h.
