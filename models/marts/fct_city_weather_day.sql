@@ -1,0 +1,9 @@
+-- models/marts/fct_city_weather_day.sql
+select
+    city_name,
+    weather_date,
+    data_source,
+    temp_max_celsius,
+    temp_min_celsius,
+    precipitation_mm
+from {{ ref('int_weather_daily_unioned') }}
