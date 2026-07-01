@@ -59,11 +59,43 @@ CITY_THRESHOLDS = {
 }
 AQI_POOR = 60  # European AQI "poor" band (official EEA scale)
 
+# A representative icon per city (landmark / feature), for the header strip.
+CITY_ICONS = {
+    "Madrid": "🏛️",
+    "Barcelona": "🏖️",
+    "Valencia": "🍊",
+    "Seville": "💃",
+    "Bilbao": "🌉",
+}
+
+# Colours for the four risk types (used in the "risk days by city" chart).
+RISK_COLORS = {
+    "🔥 Heat": "#E8590C",
+    "🌧️ Rain": "#1C7ED6",
+    "💨 Wind": "#0CA678",
+    "🏭 Poor air": "#7048E8",
+}
+
 st.set_page_config(page_title="Weather Risk Monitor", page_icon="⛈️", layout="wide")
 
 # White background + larger, readable text for all Plotly charts.
 pio.templates["plotly_white"].layout.font.size = 15
 px.defaults.template = "plotly_white"
+
+
+def facet_height(n_cities: int, per_row: int = 190, minimum: int = 260) -> int:
+    """Height for a per-city faceted chart: fewer cities → each row bigger/clearer."""
+    return max(minimum, per_row * max(n_cities, 1))
+
+
+def clean_facet_labels(fig, size: int = 17):
+    """Turn facet annotations 'city_name=Madrid' into a bold, larger 'Madrid'."""
+    fig.for_each_annotation(
+        lambda a: a.update(
+            text=f"<b>{a.text.split('=')[-1]}</b>", font=dict(size=size)
+        )
+    )
+    return fig
 
 
 # ---------------------------------------------------------------------------
@@ -148,6 +180,12 @@ def compute_forecast_risk(fc: pd.DataFrame) -> pd.DataFrame:
         + fc["is_rain"].astype(int)
         + fc["is_wind"].astype(int)
     )
+    # Which alarms are expected, as emojis (shown inside each forecast cell).
+    fc["emoji"] = (
+        fc["is_heat"].map({True: "🔥", False: ""})
+        + fc["is_rain"].map({True: "🌧️", False: ""})
+        + fc["is_wind"].map({True: "💨", False: ""})
+    )
     return fc
 
 
@@ -211,13 +249,23 @@ heatwaves_all = data["heatwaves"]
 # Header
 # ---------------------------------------------------------------------------
 st.title("⛈️ Weather Risk Monitor")
+st.markdown("#### Which cities experienced the most disruptive weather?")
+
+hdr_cols = st.columns(len(CITY_ICONS))
+for hdr_col, (hdr_city, hdr_icon) in zip(hdr_cols, CITY_ICONS.items()):
+    hdr_col.markdown(
+        f"<div style='text-align:center;padding:10px 4px;border-radius:12px;"
+        f"background:#F5F7FA;border:1px solid #E6EAF0'>"
+        f"<span style='font-size:34px'>{hdr_icon}</span><br>"
+        f"<span style='font-size:16px;font-weight:600'>{hdr_city}</span></div>",
+        unsafe_allow_html=True,
+    )
+
 st.markdown(
-    "#### Which cities experienced the most disruptive weather?"
-)
-st.markdown(
-    "Data: Open-Meteo → dbt marts → DuckDB &nbsp;·&nbsp; "
+    "<br>Data: Open-Meteo → dbt marts → DuckDB &nbsp;·&nbsp; "
     "Main grain: **one row per city per day** (`fct_city_weather_day`) &nbsp;·&nbsp; "
-    "Risk = official **AEMET yellow-warning** thresholds per city."
+    "Risk = official **AEMET yellow-warning** thresholds per city.",
+    unsafe_allow_html=True,
 )
 
 # ---------------------------------------------------------------------------
@@ -293,19 +341,19 @@ if daily.empty:
     st.warning("No data for the selected filters.")
     st.stop()
 
+n_cities = daily["city_name"].nunique()
+
 # ---------------------------------------------------------------------------
 # KPIs
 # ---------------------------------------------------------------------------
 streak_len, streak_city = longest_streak(daily)
-c1, c2, c3, c4, c5, c6, c7 = st.columns(7)
+c1, c2, c3, c4, c5, c6 = st.columns(6)
 c1.metric("Risky city-days", f"{int(daily['is_risky'].sum()):,}")
 c2.metric("🔥 Heat days", f"{int(daily['is_heat'].sum()):,}")
 c3.metric("🌧️ Rain days", f"{int(daily['is_rain'].sum()):,}")
 c4.metric("💨 Wind days", f"{int(daily['is_wind'].sum()):,}")
 c5.metric("🏭 Poor-air days", f"{int(daily['is_poor_air'].sum()):,}")
-c6.metric("🏭 Poor-air hours", f"{int(daily['poor_air_hours'].fillna(0).sum()):,}",
-          help="Hours with European AQI ≥ 60 (poor band)")
-c7.metric("📅 Longest risky streak", f"{streak_len} d", help=f"City: {streak_city}")
+c6.metric("📅 Longest risky streak", f"{streak_len} d", help=f"City: {streak_city}")
 
 st.divider()
 
@@ -333,31 +381,40 @@ fig1 = px.bar(
     y="city_name",
     color="Risk type",
     orientation="h",
+    color_discrete_map=RISK_COLORS,
+    category_orders={"Risk type": list(RISK_COLORS)},
     title="Number of risky days per city, by risk type",
 )
-fig1.update_layout(yaxis_title="", legend_title="")
+fig1.update_layout(
+    yaxis_title="",
+    legend_title="",
+    legend=dict(font=dict(size=18), orientation="v"),
+)
 st.plotly_chart(fig1, use_container_width=True)
 
 # ---------------------------------------------------------------------------
-# Chart 2 — Daily risk timeline
+# Chart 2 — Daily risk timeline (one row per city)
 # ---------------------------------------------------------------------------
 st.subheader("Daily risk timeline")
-st.caption(
-    "One line per city. Click a city in the legend to hide/show it; "
-    "double-click to isolate just one."
-)
+st.caption("One row per city. Fewer cities selected → each row is bigger.")
 timeline = (
     daily.groupby(["weather_date", "city_name"])["risk_score"]
     .sum()
     .reset_index(name="Risk score")
 )
-fig2 = px.line(
-    timeline, x="weather_date", y="Risk score", color="city_name",
+fig2 = px.area(
+    timeline.sort_values("weather_date"),
+    x="weather_date",
+    y="Risk score",
+    color="city_name",
+    facet_row="city_name",
+    height=facet_height(n_cities),
     title="Daily risk score by city",
 )
-fig2.update_layout(xaxis_title="", yaxis_title="Risk score (0-4)", legend_title="City")
-# Show every month on the x-axis (dense over multiple years; clearer when filtered).
-fig2.update_xaxes(dtick="M1", tickformat="%b %Y", tickangle=-45)
+fig2.update_layout(showlegend=False)
+fig2.update_yaxes(title_text="")
+fig2.update_xaxes(dtick="M1", tickformat="%b %Y", tickangle=-90)
+clean_facet_labels(fig2)
 st.plotly_chart(fig2, use_container_width=True)
 
 # ---------------------------------------------------------------------------
@@ -374,8 +431,9 @@ fig3 = px.imshow(
     labels=dict(x="Month", y="", color="Risky days"),
     title="Risky days per city per month",
 )
-# Force every month label to show on the x-axis (plotly hides some by default).
-fig3.update_xaxes(tickmode="linear", dtick=1, tickangle=-45)
+# Force a categorical x-axis (otherwise plotly parses "2023-01" as a datetime and
+# prints garbage time ticks) and show every month label, vertical to save space.
+fig3.update_xaxes(type="category", tickmode="linear", dtick=1, tickangle=-90)
 st.plotly_chart(fig3, use_container_width=True)
 
 # ---------------------------------------------------------------------------
@@ -411,23 +469,33 @@ st.dataframe(
 st.divider()
 
 # ---------------------------------------------------------------------------
-# Air quality panel
+# Air quality panel (one row per city)
 # ---------------------------------------------------------------------------
 st.subheader("🏭 Air quality (European AQI)")
 air = daily.dropna(subset=["avg_european_aqi"])
 if air.empty:
     st.info("No air quality data for the selected filters.")
 else:
+    st.metric(
+        "Poor-air hours (AQI ≥ 60)",
+        f"{int(air['poor_air_hours'].fillna(0).sum()):,}",
+        help="Total hours in the 'poor' European AQI band across selected cities/dates.",
+    )
+    n_air = air["city_name"].nunique()
     fig4 = px.line(
         air.sort_values("weather_date"),
-        x="weather_date", y="avg_european_aqi", color="city_name",
+        x="weather_date",
+        y="avg_european_aqi",
+        color="city_name",
+        facet_row="city_name",
+        height=facet_height(n_air),
         title="Daily average European AQI by city",
     )
-    fig4.add_hline(
-        y=aqi, line_dash="dash", line_color="red",
-        annotation_text=f"Poor-air threshold ({aqi})",
-    )
-    fig4.update_layout(xaxis_title="", yaxis_title="Avg European AQI", legend_title="")
+    fig4.add_hline(y=aqi, line_dash="dash", line_color="red")
+    fig4.update_layout(showlegend=False)
+    fig4.update_yaxes(title_text="")
+    fig4.update_xaxes(dtick="M1", tickformat="%b %Y", tickangle=-90)
+    clean_facet_labels(fig4)
     st.plotly_chart(fig4, use_container_width=True)
 
 # ---------------------------------------------------------------------------
@@ -466,8 +534,9 @@ st.divider()
 st.subheader("⛈️ Risk forecast — next 7 days")
 st.caption(
     "Upcoming risk from the Open-Meteo forecast, using the same official AEMET "
-    "thresholds per city. Only 3 alarms here (🔥 heat / 🌧️ rain / 💨 gust) — the "
-    "forecast has no air quality. Not affected by the date filter above."
+    "thresholds per city. Each cell shows which alarms are expected "
+    "(🔥 heat / 🌧️ rain / 💨 gust) — the forecast has no air quality. "
+    "Not affected by the date filter above."
 )
 fc = compute_forecast_risk(
     data["forecast"][data["forecast"]["city_name"].isin(cities)]
@@ -477,14 +546,26 @@ if fc.empty:
 else:
     fc = fc.sort_values(["city_name", "forecast_date"])
     fc_pivot = fc.pivot(index="city_name", columns="forecast_date", values="risk_score")
-    fc_pivot.columns = [c.strftime("%a %d %b") for c in fc_pivot.columns]
+    txt_pivot = (
+        fc.pivot(index="city_name", columns="forecast_date", values="emoji")
+        .reindex(index=fc_pivot.index, columns=fc_pivot.columns)
+    )
+    col_labels = [c.strftime("%a %d %b") for c in fc_pivot.columns]
     fig_fc = px.imshow(
-        fc_pivot, aspect="auto", color_continuous_scale="OrRd", zmin=0, zmax=3,
+        fc_pivot.set_axis(col_labels, axis=1),
+        aspect="auto", color_continuous_scale="OrRd", zmin=0, zmax=3,
         labels=dict(x="", y="", color="Risk score (0-3)"),
         title="Forecast risk score per city per day",
     )
+    fig_fc.update_traces(
+        text=txt_pivot.values, texttemplate="%{text}", textfont_size=20
+    )
     fig_fc.update_xaxes(tickmode="linear", dtick=1)
     st.plotly_chart(fig_fc, use_container_width=True)
+    st.markdown(
+        "**Legend:** 🔥 = extreme heat &nbsp;·&nbsp; 🌧️ = heavy rain "
+        "&nbsp;·&nbsp; 💨 = high wind (gust). Empty cell = no alarm expected."
+    )
 
     risky_fc = fc[fc["risk_score"] > 0].assign(day=lambda d: d["forecast_date"].dt.date)
     if risky_fc.empty:
@@ -493,11 +574,12 @@ else:
         st.markdown("**Upcoming risky days:**")
         st.dataframe(
             risky_fc[
-                ["day", "city_name", "temp_max_celsius",
+                ["day", "city_name", "emoji", "temp_max_celsius",
                  "precipitation_mm", "wind_gust_max_kmh", "risk_score"]
             ].rename(
                 columns={
                     "city_name": "city",
+                    "emoji": "alarms",
                     "temp_max_celsius": "temp max °C",
                     "precipitation_mm": "precip mm",
                     "wind_gust_max_kmh": "gust km/h",
