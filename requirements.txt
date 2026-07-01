@@ -1,0 +1,8 @@
+# Runtime dependencies for the Streamlit dashboard (Streamlit Community Cloud).
+# The DuckDB database is pre-built and committed, so dbt is not needed at runtime.
+# duckdb is pinned to the version that built my_database.duckdb so the file format
+# is readable on the cloud.
+streamlit>=1.30
+duckdb==0.10.2
+pandas>=2.0
+plotly>=5.18
