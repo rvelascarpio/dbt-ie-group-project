@@ -9,7 +9,7 @@ Cities covered: **Madrid, Barcelona, Valencia, Seville, Bilbao**.
 
 ## 🔗 Dashboard
 
-- **Live (Streamlit Community Cloud):** _link to be added after deploy_
+- **Live (Streamlit Community Cloud):** <https://dbt-ie-group-project-weather-risk-monitor.streamlit.app>
 - **Run locally:** see [Launch the dashboard](#5-launch-the-dashboard) below.
 
 The dashboard answers: **which cities experienced the most disruptive weather?**
