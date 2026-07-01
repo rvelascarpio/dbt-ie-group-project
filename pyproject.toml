@@ -9,6 +9,9 @@ dependencies = [
     "dbt-duckdb>=1.8.0",
     "duckdb==0.10.2",
     "certifi",
+    "streamlit>=1.30",
+    "plotly>=5.18",
+    "pandas>=2.0",
 ]
 
 [tool.uv]
