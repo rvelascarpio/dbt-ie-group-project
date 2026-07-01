@@ -58,7 +58,7 @@ for city in CITIES:
             "wind_gusts_10m_max":  daily["wind_gusts_10m_max"][i],
         })
 
-out = Path("src/data/raw/open_meteo/raw_historical_weather_daily.csv")
+out = Path("data/raw/open_meteo/raw_historical_weather_daily.csv")
 out.parent.mkdir(parents=True, exist_ok=True)
 
 with out.open("w", newline="") as f:
