@@ -42,6 +42,7 @@ select
     air_quality.avg_european_aqi,
     air_quality.max_european_aqi,
     air_quality.hours_observed,
+    air_quality.poor_air_hours,
     alerts.exceeds_who_pm2_5_guideline,
     alerts.exceeds_eu_aqi_poor_threshold,
     exposure.population,

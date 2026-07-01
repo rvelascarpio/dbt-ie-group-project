@@ -36,7 +36,7 @@ for city in CITIES:
         "longitude":  city["longitude"],
         "start_date": START_DATE,
         "end_date":   END_DATE,
-        "daily":      "temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max",
+        "daily":      "temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,wind_gusts_10m_max",
         "timezone":   city["timezone"],
     }
 
@@ -55,6 +55,7 @@ for city in CITIES:
             "temperature_2m_min":  daily["temperature_2m_min"][i],
             "precipitation_sum":   daily["precipitation_sum"][i],
             "wind_speed_10m_max":  daily["wind_speed_10m_max"][i],
+            "wind_gusts_10m_max":  daily["wind_gusts_10m_max"][i],
         })
 
 out = Path("src/data/raw/open_meteo/raw_historical_weather_daily.csv")

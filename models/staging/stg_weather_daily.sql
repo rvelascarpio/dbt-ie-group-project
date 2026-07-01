@@ -15,5 +15,6 @@ select
     precipitation_sum as precipitation_mm,
     rain_sum as rain_mm,
     snowfall_sum as snowfall_cm,
-    wind_speed_10m_max as wind_speed_max_kmh
+    wind_speed_10m_max as wind_speed_max_kmh,
+    wind_gusts_10m_max as wind_gust_max_kmh
 from {{ source('raw', 'weather_daily') }}

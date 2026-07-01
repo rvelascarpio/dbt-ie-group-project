@@ -8,6 +8,7 @@ with recent as (
         temp_min_celsius,
         precipitation_mm,
         wind_speed_max_kmh,
+        wind_gust_max_kmh,
         'recent_weather' as data_source
 
     from {{ ref('stg_weather_daily') }}
@@ -23,6 +24,7 @@ historical as (
         temp_min_celsius,
         precipitation_mm,
         wind_speed_max_kmh,
+        wind_gust_max_kmh,
         'historical_weather' as data_source
 
     from {{ ref('stg_historical_weather_daily') }}
@@ -48,6 +50,7 @@ select
     temp_min_celsius,
     precipitation_mm,
     wind_speed_max_kmh,
+    wind_gust_max_kmh,
     data_source
 from unioned
 qualify row_number() over (

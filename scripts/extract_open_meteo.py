@@ -39,6 +39,7 @@ DEFAULT_DAILY_WEATHER_VARIABLES = [
     "rain_sum",
     "snowfall_sum",
     "wind_speed_10m_max",
+    "wind_gusts_10m_max",
 ]
 DEFAULT_AIR_QUALITY_VARIABLES = [
     "pm10",

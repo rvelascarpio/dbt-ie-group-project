@@ -13,6 +13,8 @@ select
     avg(ozone_ug_m3) as avg_ozone_ug_m3,
     avg(european_aqi) as avg_european_aqi,
     max(european_aqi) as max_european_aqi,
-    count(*) as hours_observed
+    count(*) as hours_observed,
+    -- hours in the "poor" European AQI band or worse (aqi >= 60)
+    sum(case when european_aqi >= 60 then 1 else 0 end) as poor_air_hours
 from {{ ref('stg_air_quality_hourly') }}
 group by 1, 2, 3, 4
