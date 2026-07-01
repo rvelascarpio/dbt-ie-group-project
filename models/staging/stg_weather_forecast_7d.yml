@@ -15,8 +15,16 @@ models:
           - not_null
       - name: latitude
         description: Latitude of the city.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: -90
+              max_value: 90
       - name: longitude
         description: Longitude of the city.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: -180
+              max_value: 180
       - name: forecast_date
         description: Calendar date the forecast applies to.
         tests:
@@ -25,8 +33,16 @@ models:
         description: WMO weather code for the day.
       - name: temp_max_celsius
         description: Maximum forecast temperature of the day, in degrees Celsius.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: -60
+              max_value: 60
       - name: temp_min_celsius
         description: Minimum forecast temperature of the day, in degrees Celsius.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: -60
+              max_value: 60
       - name: apparent_temp_max_celsius
         description: Maximum apparent ("feels like") temperature of the day, in degrees Celsius.
       - name: apparent_temp_min_celsius
@@ -41,10 +57,22 @@ models:
         description: Duration of sunshine, in seconds.
       - name: uv_index_max
         description: Maximum UV index of the day.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 20
       - name: uv_index_clear_sky_max
         description: Maximum UV index of the day under clear sky conditions.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 20
       - name: precipitation_mm
         description: Total precipitation for the day, in millimeters.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 1000
       - name: rain_mm
         description: Total rain for the day, in millimeters.
       - name: showers_mm
@@ -55,12 +83,28 @@ models:
         description: Number of hours with precipitation during the day.
       - name: precipitation_probability_max_pct
         description: Maximum probability of precipitation during the day, as a percentage.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 100
       - name: wind_speed_max_kmh
         description: Maximum wind speed at 10m during the day, in km/h.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 200
       - name: wind_gusts_max_kmh
         description: Maximum wind gusts at 10m during the day, in km/h.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 300
       - name: wind_direction_dominant_deg
         description: Dominant wind direction at 10m during the day, in degrees.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 360
       - name: shortwave_radiation_sum_mj_m2
         description: Total shortwave solar radiation for the day, in MJ/m².
       - name: et0_fao_evapotranspiration_mm

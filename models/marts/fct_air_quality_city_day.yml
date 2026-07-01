@@ -13,6 +13,9 @@ models:
         description: Identifier of the city, foreign key to dim_location.
         tests:
           - not_null
+          - relationships:
+              to: ref('dim_location')
+              field: location_id
       - name: city_name
         description: Name of the city.
         tests:

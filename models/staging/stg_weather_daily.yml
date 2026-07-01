@@ -11,6 +11,9 @@ models:
     columns:
       - name: source_name
         description: Label of the extraction source (constant 'recent_weather').
+        tests:
+          - accepted_values:
+              values: ['recent_weather']
       - name: extracted_at
         description: Timestamp when the data was pulled from the API.
       - name: location_id
@@ -29,21 +32,57 @@ models:
           - not_null
       - name: latitude
         description: Latitude of the city.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: -90
+              max_value: 90
       - name: longitude
         description: Longitude of the city.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: -180
+              max_value: 180
       - name: timezone
         description: Timezone of the city.
       - name: temp_max_celsius
         description: Maximum temperature of the day, in degrees Celsius.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: -60
+              max_value: 60
       - name: temp_min_celsius
         description: Minimum temperature of the day, in degrees Celsius.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: -60
+              max_value: 60
       - name: temp_mean_celsius
         description: Mean temperature of the day, in degrees Celsius.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: -60
+              max_value: 60
       - name: precipitation_mm
         description: Total precipitation for the day, in millimeters.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 1000
       - name: rain_mm
         description: Total rain for the day, in millimeters.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 1000
       - name: snowfall_cm
         description: Total snowfall for the day, in centimeters.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 300
       - name: wind_speed_max_kmh
         description: Maximum wind speed at 10m during the day, in km/h.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 200

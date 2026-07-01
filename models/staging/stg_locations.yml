@@ -21,13 +21,27 @@ models:
         description: First-level administrative region (state/province).
       - name: latitude
         description: Latitude of the city.
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: -90
+              max_value: 90
       - name: longitude
         description: Longitude of the city.
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: -180
+              max_value: 180
       - name: timezone
         description: Timezone of the city.
       - name: elevation_meters
         description: Elevation above sea level, in meters.
       - name: population
         description: Population of the city.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 40000000
       - name: extracted_at
         description: Timestamp when this location record was extracted from the API.

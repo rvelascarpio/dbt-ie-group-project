@@ -11,6 +11,9 @@ models:
     columns:
       - name: source_name
         description: Label of the extraction source (constant 'air_quality').
+        tests:
+          - accepted_values:
+              values: ['air_quality']
       - name: extracted_at
         description: Timestamp when the data was pulled from the API.
       - name: location_id
@@ -29,19 +32,51 @@ models:
           - not_null
       - name: latitude
         description: Latitude of the city.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: -90
+              max_value: 90
       - name: longitude
         description: Longitude of the city.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: -180
+              max_value: 180
       - name: timezone
         description: Timezone of the city.
       - name: pm10_ug_m3
         description: Particulate matter up to 10 micrometers, in micrograms per cubic meter.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 5000
       - name: pm2_5_ug_m3
         description: Particulate matter up to 2.5 micrometers, in micrograms per cubic meter.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 5000
       - name: carbon_monoxide_ug_m3
         description: Carbon monoxide concentration, in micrograms per cubic meter.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 100000
       - name: nitrogen_dioxide_ug_m3
         description: Nitrogen dioxide concentration, in micrograms per cubic meter.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 10000
       - name: ozone_ug_m3
         description: Ozone concentration, in micrograms per cubic meter.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 10000
       - name: european_aqi
         description: European Air Quality Index, a dimensionless composite score.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 500

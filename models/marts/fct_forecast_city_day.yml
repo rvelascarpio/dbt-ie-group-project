@@ -22,14 +22,30 @@ models:
           - not_null
       - name: forecast_temp_max_celsius
         description: Forecasted daily maximum temperature, in degrees Celsius.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: -60
+              max_value: 60
       - name: actual_temp_max_celsius
         description: Observed daily maximum temperature, in degrees Celsius.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: -60
+              max_value: 60
       - name: temp_max_error_celsius
         description: Forecast minus actual maximum temperature, in degrees Celsius.
       - name: forecast_temp_min_celsius
         description: Forecasted daily minimum temperature, in degrees Celsius.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: -60
+              max_value: 60
       - name: actual_temp_min_celsius
         description: Observed daily minimum temperature, in degrees Celsius.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: -60
+              max_value: 60
       - name: temp_min_error_celsius
         description: Forecast minus actual minimum temperature, in degrees Celsius.
       - name: forecast_precipitation_mm
@@ -40,7 +56,15 @@ models:
         description: Forecast minus actual precipitation, in millimeters.
       - name: forecast_wind_speed_max_kmh
         description: Forecasted maximum wind speed, in km/h.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 200
       - name: actual_wind_speed_max_kmh
         description: Observed maximum wind speed, in km/h.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 200
       - name: wind_speed_max_error_kmh
         description: Forecast minus actual maximum wind speed, in km/h.

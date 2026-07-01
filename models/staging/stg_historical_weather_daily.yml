@@ -19,7 +19,19 @@ models:
           - not_null
       - name: temp_max_celsius
         description: Maximum temperature of the day, in degrees Celsius.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: -60
+              max_value: 60
       - name: temp_min_celsius
         description: Minimum temperature of the day, in degrees Celsius.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: -60
+              max_value: 60
       - name: precipitation_mm
         description: Total precipitation for the day, in millimeters.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 1000
