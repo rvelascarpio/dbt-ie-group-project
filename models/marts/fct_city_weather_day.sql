@@ -5,5 +5,6 @@ select
     data_source,
     temp_max_celsius,
     temp_min_celsius,
-    precipitation_mm
+    precipitation_mm,
+    wind_speed_max_kmh
 from {{ ref('int_weather_daily_unioned') }}

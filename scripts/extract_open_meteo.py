@@ -237,13 +237,18 @@ def fetch_forecast(
     return build_daily_rows(payload, location, extracted_at, "forecast")
 
 
-def fetch_air_quality(location: dict[str, Any], extracted_at: str) -> list[dict[str, Any]]:
+def fetch_air_quality(
+    location: dict[str, Any], past_days: int, extracted_at: str
+) -> list[dict[str, Any]]:
     payload = get_json(
         AIR_QUALITY_URL,
         {
             "latitude": location["latitude"],
             "longitude": location["longitude"],
             "hourly": ",".join(DEFAULT_AIR_QUALITY_VARIABLES),
+            # Air Quality API supports up to 92 past days; without this it only
+            # returns a few days, leaving the air-quality models too thin.
+            "past_days": past_days,
             "timezone": location["timezone"] or "auto",
         },
     )
@@ -288,7 +293,9 @@ def main() -> int:
         forecast_daily_rows.extend(fetch_forecast(location, args.forecast_days, extracted_at))
         time.sleep(args.pause_seconds)
 
-        air_quality_hourly_rows.extend(fetch_air_quality(location, extracted_at))
+        air_quality_hourly_rows.extend(
+            fetch_air_quality(location, args.past_days, extracted_at)
+        )
         time.sleep(args.pause_seconds)
 
     write_csv(output_dir / "raw_locations.csv", locations)

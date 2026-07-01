@@ -1,9 +1,16 @@
 import json
 import ssl
 import csv
+from datetime import date as date_cls, timedelta
 from pathlib import Path
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
+
+# The Archive API only has confirmed data up to ~5 days ago. We pull from a fixed
+# start up to that edge; the recent Forecast-API extraction (extract_open_meteo.py)
+# covers the last few days up to today, so the two together leave no gap.
+START_DATE = "2023-01-01"
+END_DATE = (date_cls.today() - timedelta(days=5)).isoformat()
 
 try:
     import certifi
@@ -27,9 +34,9 @@ for city in CITIES:
     params = {
         "latitude":   city["latitude"],
         "longitude":  city["longitude"],
-        "start_date": "2023-01-01",
-        "end_date":   "2024-12-31",
-        "daily":      "temperature_2m_max,temperature_2m_min,precipitation_sum",
+        "start_date": START_DATE,
+        "end_date":   END_DATE,
+        "daily":      "temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max",
         "timezone":   city["timezone"],
     }
 
@@ -40,16 +47,17 @@ for city in CITIES:
         data = json.loads(r.read())
 
     daily = data["daily"]
-    for i, date in enumerate(daily["time"]):
+    for i, day in enumerate(daily["time"]):
         all_rows.append({
             "city_name":           city["name"],
-            "date":                date,
+            "date":                day,
             "temperature_2m_max":  daily["temperature_2m_max"][i],
             "temperature_2m_min":  daily["temperature_2m_min"][i],
             "precipitation_sum":   daily["precipitation_sum"][i],
+            "wind_speed_10m_max":  daily["wind_speed_10m_max"][i],
         })
 
-out = Path("data/raw/open_meteo/raw_historical_weather_daily.csv")
+out = Path("src/data/raw/open_meteo/raw_historical_weather_daily.csv")
 out.parent.mkdir(parents=True, exist_ok=True)
 
 with out.open("w", newline="") as f:
