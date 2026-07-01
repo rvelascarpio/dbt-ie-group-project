@@ -49,6 +49,10 @@ DEFAULT_AIR_QUALITY_VARIABLES = [
     "european_aqi",
 ]
 
+# The Air Quality API caps `past_days` at 92, but `start_date`/`end_date` reaches
+# back to 2023 — so air quality can cover the same range as the weather history.
+AIR_QUALITY_START_DATE = "2023-01-01"
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -238,7 +242,7 @@ def fetch_forecast(
 
 
 def fetch_air_quality(
-    location: dict[str, Any], past_days: int, extracted_at: str
+    location: dict[str, Any], start_date: str, end_date: str, extracted_at: str
 ) -> list[dict[str, Any]]:
     payload = get_json(
         AIR_QUALITY_URL,
@@ -246,9 +250,10 @@ def fetch_air_quality(
             "latitude": location["latitude"],
             "longitude": location["longitude"],
             "hourly": ",".join(DEFAULT_AIR_QUALITY_VARIABLES),
-            # Air Quality API supports up to 92 past days; without this it only
-            # returns a few days, leaving the air-quality models too thin.
-            "past_days": past_days,
+            # start_date/end_date (not past_days, capped at 92) pulls the full
+            # history so air quality matches the 2023->today weather range.
+            "start_date": start_date,
+            "end_date": end_date,
             "timezone": location["timezone"] or "auto",
         },
     )
@@ -272,7 +277,9 @@ def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
 def main() -> int:
     args = parse_args()
     output_dir = Path(args.output_dir)
-    extracted_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+    now = datetime.now(timezone.utc)
+    extracted_at = now.replace(microsecond=0).isoformat()
+    air_end_date = now.date().isoformat()
 
     locations = []
     weather_daily_rows = []
@@ -294,7 +301,9 @@ def main() -> int:
         time.sleep(args.pause_seconds)
 
         air_quality_hourly_rows.extend(
-            fetch_air_quality(location, args.past_days, extracted_at)
+            fetch_air_quality(
+                location, AIR_QUALITY_START_DATE, air_end_date, extracted_at
+            )
         )
         time.sleep(args.pause_seconds)
 
