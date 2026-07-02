@@ -15,3 +15,5 @@ sources:
         description: "Air quality forecast observations. Grain: one row per city per hour."
       - name: historical_weather_daily
         description: "Historical daily weather (Historical Weather API, 2023-2024). Grain: one row per city per day."
+      - name: forecast_daily
+        description: "7-day daily weather forecast from the Forecast API (extract_open_meteo.py). Grain: one row per city per forecast date per extraction run."

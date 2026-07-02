@@ -4,7 +4,7 @@ This is the group-project equivalent of the class `create_db.py` (same name, sam
 role). The class version reads Parquet files; ours reads the CSVs the extraction
 scripts produced.
 
-Each CSV in `src/data/raw/open_meteo/` becomes one table in DuckDB. The leading
+Each CSV in `data/raw/open_meteo/` becomes one table in DuckDB. The leading
 `raw_` prefix is stripped from the file name so the tables are named, e.g.,
 `historical_weather_daily`, `locations`, `air_quality_hourly`. Those table names
 are what `models/sources.yml` registers as the `raw` source, so dbt can read them
@@ -20,7 +20,7 @@ from pathlib import Path
 
 import duckdb
 
-RAW_DIR = "src/data/raw/open_meteo"
+RAW_DIR = "data/raw/open_meteo"
 
 
 def create_database(db_path: str, data_dir: str = RAW_DIR) -> None:

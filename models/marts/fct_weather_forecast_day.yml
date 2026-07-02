@@ -1,0 +1,48 @@
+version: 2
+
+models:
+  - name: fct_weather_forecast_day
+    description: Forward-looking daily weather forecast fact (next 7 days), keeping the most recent extraction per city per date. Grain - one row per city per forecast date. Powers the Streamlit "risk forecast" panel.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - city_name
+            - forecast_date
+    columns:
+      - name: city_name
+        description: Name of the city.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_location')
+              field: city_name
+      - name: forecast_date
+        description: Calendar date the forecast refers to.
+        tests:
+          - not_null
+      - name: extracted_at
+        description: Timestamp of the extraction run this forecast came from.
+      - name: temp_max_celsius
+        description: Forecasted daily maximum temperature, in degrees Celsius.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: -60
+              max_value: 60
+      - name: temp_min_celsius
+        description: Forecasted daily minimum temperature, in degrees Celsius.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: -60
+              max_value: 60
+      - name: precipitation_mm
+        description: Forecasted total daily precipitation, in millimeters.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 1000
+      - name: wind_gust_max_kmh
+        description: Forecasted maximum wind gust at 10m, in km/h.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 250

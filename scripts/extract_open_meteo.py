@@ -39,6 +39,7 @@ DEFAULT_DAILY_WEATHER_VARIABLES = [
     "rain_sum",
     "snowfall_sum",
     "wind_speed_10m_max",
+    "wind_gusts_10m_max",
 ]
 DEFAULT_AIR_QUALITY_VARIABLES = [
     "pm10",
@@ -48,6 +49,10 @@ DEFAULT_AIR_QUALITY_VARIABLES = [
     "ozone",
     "european_aqi",
 ]
+
+# The Air Quality API caps `past_days` at 92, but `start_date`/`end_date` reaches
+# back to 2023 — so air quality can cover the same range as the weather history.
+AIR_QUALITY_START_DATE = "2023-01-01"
 
 
 def parse_args() -> argparse.Namespace:
@@ -237,13 +242,19 @@ def fetch_forecast(
     return build_daily_rows(payload, location, extracted_at, "forecast")
 
 
-def fetch_air_quality(location: dict[str, Any], extracted_at: str) -> list[dict[str, Any]]:
+def fetch_air_quality(
+    location: dict[str, Any], start_date: str, end_date: str, extracted_at: str
+) -> list[dict[str, Any]]:
     payload = get_json(
         AIR_QUALITY_URL,
         {
             "latitude": location["latitude"],
             "longitude": location["longitude"],
             "hourly": ",".join(DEFAULT_AIR_QUALITY_VARIABLES),
+            # start_date/end_date (not past_days, capped at 92) pulls the full
+            # history so air quality matches the 2023->today weather range.
+            "start_date": start_date,
+            "end_date": end_date,
             "timezone": location["timezone"] or "auto",
         },
     )
@@ -267,7 +278,9 @@ def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
 def main() -> int:
     args = parse_args()
     output_dir = Path(args.output_dir)
-    extracted_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+    now = datetime.now(timezone.utc)
+    extracted_at = now.replace(microsecond=0).isoformat()
+    air_end_date = now.date().isoformat()
 
     locations = []
     weather_daily_rows = []
@@ -288,7 +301,11 @@ def main() -> int:
         forecast_daily_rows.extend(fetch_forecast(location, args.forecast_days, extracted_at))
         time.sleep(args.pause_seconds)
 
-        air_quality_hourly_rows.extend(fetch_air_quality(location, extracted_at))
+        air_quality_hourly_rows.extend(
+            fetch_air_quality(
+                location, AIR_QUALITY_START_DATE, air_end_date, extracted_at
+            )
+        )
         time.sleep(args.pause_seconds)
 
     write_csv(output_dir / "raw_locations.csv", locations)

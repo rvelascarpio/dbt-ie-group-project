@@ -4,7 +4,7 @@
 Same logic as the teacher's extract_open_meteo.py, trimmed to just the
 "recent weather" part (Forecast API with past_days). Writes one file:
 
-    src/data/raw/open_meteo/raw_weather_daily.csv
+    data/raw/open_meteo/raw_weather_daily.csv
 
 It does NOT touch the other CSVs. Run it from the project root:
 
@@ -52,7 +52,7 @@ def parse_args() -> argparse.Namespace:
         default=30,
         help="Number of recent past days to extract from the Forecast API. Maximum is 92.",
     )
-    parser.add_argument("--output-dir", default="src/data/raw/open_meteo")
+    parser.add_argument("--output-dir", default="data/raw/open_meteo")
     parser.add_argument("--pause-seconds", type=float, default=0.25)
     args = parser.parse_args()
     if not 0 <= args.past_days <= 92:

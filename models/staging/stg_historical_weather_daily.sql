@@ -7,5 +7,7 @@ select
     date as weather_date,
     temperature_2m_max as temp_max_celsius,
     temperature_2m_min as temp_min_celsius,
-    precipitation_sum as precipitation_mm
+    precipitation_sum as precipitation_mm,
+    wind_speed_10m_max as wind_speed_max_kmh,
+    wind_gusts_10m_max as wind_gust_max_kmh
 from {{ source('raw', 'historical_weather_daily') }}
