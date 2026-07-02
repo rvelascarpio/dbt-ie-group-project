@@ -105,7 +105,7 @@ Opens at `http://localhost:8501`.
 
 Sources → Staging → Intermediate → Marts.
 
-- **Sources** (`models/sources.yml`): 6 raw tables loaded by `create_db.py`.
+- **Sources** (`models/sources.yml`): 5 raw tables loaded by `create_db.py`.
 - **Staging** (`stg_*`, views): one per source; rename to snake_case, cast types,
   keep the source grain.
 - **Intermediate** (`int_*`): unions and aggregations, e.g. `int_weather_daily_unioned`
